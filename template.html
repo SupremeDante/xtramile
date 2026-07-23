@@ -5,10 +5,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>XtraMile Music Reviews</title>
 <meta name="description" content="XtraMile Music Reviews — live song review sessions.">
-<meta http-equiv="refresh" content="0; url=__TARGET__">
-<link rel="canonical" href="__TARGET__">
 <meta property="og:title" content="XtraMile Music Reviews">
 <meta property="og:description" content="Live song review sessions. Submit your track.">
+<!-- No meta-refresh in <head> on purpose: GitHub Pages serves this file with
+     cache-control max-age=600, so a baked-in target goes stale the moment the tunnel
+     rotates or a new session starts. The script below reads target.json fresh on every
+     load instead; the baked value survives only as a no-JS / fetch-failure fallback. -->
+<noscript><meta http-equiv="refresh" content="0; url=__TARGET__"></noscript>
 <style>
   :root { color-scheme: dark; }
   html,body { height:100%; margin:0; }
@@ -35,8 +38,18 @@
   <div class="wrap">
     <h1><span class="dot"></span>XtraMile Music Reviews</h1>
     <p>Taking you to the live session&hellip;</p>
-    <a class="btn" href="__TARGET__">Enter session</a>
+    <a class="btn" id="go" href="__TARGET__">Enter session</a>
   </div>
-  <script>location.replace("__TARGET__");</script>
+<script>
+(function () {
+  var fallback = "__TARGET__";
+  function go(u) { document.getElementById('go').href = u; location.replace(u); }
+  // Cache-buster + no-store: a cached copy of this page must still resolve the CURRENT session.
+  fetch('target.json?cb=' + Date.now(), { cache: 'no-store' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (d) { go(d && d.url ? d.url : fallback); })
+    .catch(function () { go(fallback); });
+})();
+</script>
 </body>
 </html>
